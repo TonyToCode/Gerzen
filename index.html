@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Политический тест</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen text-gray-800">
+
+  <div class="max-w-4xl mx-auto py-10 px-4">
+    <h1 class="text-4xl font-bold mb-8 text-center">Политический тест</h1>
+
+    <form id="quiz" class="space-y-8">
+      <!-- Здесь будут вопросы -->
+    </form>
+
+    <div class="flex justify-center mt-10">
+      <button type="button" onclick="calculateResult()" class="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700">Посчитать результат</button>
+    </div>
+
+    <div id="result" class="mt-12 hidden">
+      <h2 class="text-2xl font-bold mb-4">Результат</h2>
+      <p id="summary" class="mb-6"></p>
+      <div id="fullAnalysis" class="prose max-w-none"></div>
+    </div>
+  </div>
+
+<script>
+// Пары вопросов: {id, текст вопроса, варианты [A, B, C, D], тэг: "economic" или "social"}
+const questions = [
+  // Пример:
+  {
+    id: 1,
+    text: "Правительство планирует повысить налоги на богатых для расширения социальных программ. Как вы относитесь к этой инициативе?",
+    options: [
+      "Полностью поддерживаю: государство должно перераспределять богатство.",
+      "Скорее поддерживаю: разумное повышение налогов допустимо.",
+      "Скорее против: повышение налогов вредит бизнесу.",
+      "Полностью против: налоги должны быть минимальными."
+    ],
+    type: "economic"
+  },
+  // ... сюда вставлю все остальные 49 вопросов (готовлю их сейчас)
+];
+
+// Анализ по результату
+const analysisTexts = {
+  "left-liberal": `Текст про левый-либеральный тип...`,
+  "left-authoritarian": `Текст про левый-авторитарный тип...`,
+  "right-liberal": `Текст про правый-либеральный тип...`,
+  "right-authoritarian": `Текст про правый-авторитарный тип...`
+};
+
+// Генерация вопросов
+function renderQuestions() {
+  const form = document.getElementById('quiz');
+  questions.forEach(q => {
+    const qDiv = document.createElement('div');
+    qDiv.className = 'bg-white p-6 rounded shadow';
+
+    qDiv.innerHTML = `<h3 class="text-xl font-semibold mb-4">${q.id}. ${q.text}</h3>` +
+      q.options.map((opt, index) => `
+        <label class="block mb-2">
+          <input type="radio" name="q${q.id}" value="${index}" class="mr-2">
+          ${opt}
+        </label>
+      `).join('');
+
+    form.appendChild(qDiv);
+  });
+}
+
+function calculateResult() {
+  let economic = 0;
+  let social = 0;
+
+  questions.forEach(q => {
+    const selected = document.querySelector(`input[name='q${q.id}']:checked`);
+    if (!selected) return;
+    const val = parseInt(selected.value);
+    let delta;
+    if (val === 0) delta = -2;
+    if (val === 1) delta = -1;
+    if (val === 2) delta = 1;
+    if (val === 3) delta = 2;
+
+    if (q.type === "economic") economic += delta;
+    if (q.type === "social") social += delta;
+  });
+
+  let eco = economic < 0 ? "left" : "right";
+  let soc = social < 0 ? "liberal" : "authoritarian";
+
+  const finalType = `${eco}-${soc}`;
+
+  document.getElementById('summary').innerText = `Ваш тип: ${eco.toUpperCase()} - ${soc.toUpperCase()}`;
+  document.getElementById('fullAnalysis').innerHTML = `<p>${analysisTexts[finalType]}</p>`;
+  document.getElementById('result').classList.remove('hidden');
+}
+
+// Рендерим при загрузке
+renderQuestions();
+</script>
+
+</body>
+</html>
+
